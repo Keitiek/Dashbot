@@ -6,3 +6,11 @@ In our second years second semester we are going to make the bot fully autonomou
 #Package architecture arm64
 
 Links: https://docs.google.com/document/d/1k4zGNElfIEvhm66o9c2Qz7obtGh0yeYQ0cZfCKrCHxU/edit
+
+
+
+
+
+
+
+ROS installimine: https://docs.ros.org/en/humble/Installation/Alternatives/Ubuntu-Development-Setup.html#additional-rmw-implementations-optional
