@@ -5,4 +5,4 @@ In our second years second semester we are going to make the bot fully autonomou
 
 #Package architecture arm64
 
-Links:
+Links: https://docs.google.com/document/d/1k4zGNElfIEvhm66o9c2Qz7obtGh0yeYQ0cZfCKrCHxU/edit
