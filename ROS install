@@ -80,8 +80,8 @@ niiviisi eemaldasime pythoni
 dashbot@dashbot:~/ros2_humble$ ll /usr/lib/python3.9/
 total 32
 
+siinkohal ära unusta minna õigesse kausta: ros2_humble  
 dashbot@dashbot:~/ros2_humble$ colcon build --symlink-install --cmake-args -DPYTHON_EXECUTABLE=/usr/bin/python3.8
-sedamoodi ta määrab ära, et ehitame omi asju sedaviisi. Novot. Või siis votnoh. You never know.
 
 Summary: 344 packages finished [1h 25min 26s]
 Kui sihuke kiri ees, siis oh seda rõõmu! Kõik läks seekord kenasti.
