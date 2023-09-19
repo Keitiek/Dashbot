@@ -56,4 +56,32 @@ Teises terminalis
 *. ~/ros2_humble/install/local_setup.bash
 *ros2 run demo_nodes_py listener
 
+PYTHON ERROR ja lahendus:
+CMake Error at /usr/share/cmake-3.16/Modules/FindPackageHandleStandardArgs.cmake:146 (message):
+  Could NOT find Python3 (missing: Development) (found suitable version
+  "3.9.5", minimum required is "3.8")
 
+dashbot@dashbot:~/ros2_humble$ ll /usr/lib/python
+python2.7/ python3/   python3.8/ python3.9/ 
+dashbot@dashbot:~/ros2_humble$ ll /usr/lib/python3.9/
+total 4948 <- seda on liiga palju! aga see pole oluline, nii et kustutame Pythoni ära
+
+dashbot@dashbot:~/ros2_humble$ sudo apt-get clean
+[sudo] password for dashbot: 
+dashbot@dashbot:~/ros2_humble$ sudo apt-get autoremove --purge
+Reading package lists... Done
+Building dependency tree       
+Reading state information... Done
+0 upgraded, 0 newly installed, 0 to remove and 2 not upgraded.
+dashbot@dashbot:~/ros2_humble$ sudo apt-get remove python3.9
+dashbot@dashbot:~/ros2_humble$ sudo apt-get autoremove
+
+niiviisi eemaldasime pythoni 
+dashbot@dashbot:~/ros2_humble$ ll /usr/lib/python3.9/
+total 32
+
+dashbot@dashbot:~/ros2_humble$ colcon build --symlink-install --cmake-args -DPYTHON_EXECUTABLE=/usr/bin/python3.8
+sedamoodi ta määrab ära, et ehitame omi asju sedaviisi. Novot. Või siis votnoh. You never know.
+
+Summary: 344 packages finished [1h 25min 26s]
+Kui sihuke kiri ees, siis oh seda rõõmu! Kõik läks seekord kenasti.
