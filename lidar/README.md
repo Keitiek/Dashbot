@@ -11,5 +11,7 @@ Protection grade: IPX-4
 Measuring Angle: 0°-360°
 
 ## Links
+- Manufacturer: https://www.ldrobot.com
+- User guide: https://www.inno-maker.com
 - Product page: https://www.inno-maker.com/product/lidar-ld06/
 - Datasheet: https://www.inno-maker.com/wp-content/uploads/2020/11/LDROBOT_LD06_Datasheet.pdf
