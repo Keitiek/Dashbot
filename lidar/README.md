@@ -27,5 +27,6 @@ Measuring Angle: 0°-360°
 
 ## Installation and running
 - First, follow https://www.youtube.com/watch?v=OJWAsV6-0GE to the point. When LD06 is picked in the video, choose LD19 instead.
+- Source setup.bash
 - Then, run this command to see sensor data: ros2 launch ldlidar_stl_ros2 viewer_ld19.launch.py
 - To see messages published in the topic, run this command: ros2 topic echo /scan
