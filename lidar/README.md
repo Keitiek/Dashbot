@@ -49,4 +49,5 @@ To set up and run the LiDAR_LD19, follow these steps:
      ```
     rviz2
      ```
+     
     You might need to setup rviz2, in that case, just go back to the instructional video above.
