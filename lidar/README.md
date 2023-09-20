@@ -15,7 +15,7 @@ Measuring Angle: 0°-360°
 - User guide: https://www.inno-maker.com
 - Product page: https://www.inno-maker.com/product/lidar-ld06/
 - Datasheet: https://www.inno-maker.com/wp-content/uploads/2020/11/LDROBOT_LD06_Datasheet.pdf
-- O
+- LDRobot official github page: https://github.com/ldrobotSensorTeam/ 
 
 ## Terms and abbreviations
 
