@@ -5,5 +5,6 @@ In our second years second semester we are going to make the bot fully autonomou
 
 #Package architecture arm64
 
-Links: https://docs.google.com/document/d/1k4zGNElfIEvhm66o9c2Qz7obtGh0yeYQ0cZfCKrCHxU/edit
-
+Links:
+* Praktikapäevik: https://docs.google.com/document/d/1k4zGNElfIEvhm66o9c2Qz7obtGh0yeYQ0cZfCKrCHxU/edit
+* algne materjal : https://docs.google.com/document/d/1Y4k4K5Uz_eEKPzYucG88JseUbh_P795UTVBd52koccg/edit?usp=sharing
