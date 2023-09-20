@@ -30,24 +30,22 @@ We are using Innomaker LiDAR_LD19 for our project.
 To set up and run the LiDAR_LD19, follow these steps:
 - Follow the instructional video [Innomaker LiDAR_LD19 Setup Video](https://www.youtube.com/watch?v=OJWAsV6-0GE). When selecting the text file for LiDAR model in the video, choose LD19 instead of LD06
 2. Execute the following commands in your terminal:
+    - Set up the environment:
+        ```
+        source setup.bash
+        ```
 
-   - Set up the environment:
-     ```
-     source setup.bash
-     ```
+    - Launch the sensor data viewer:
+        ```
+        ros2 launch ldlidar_stl_ros2 viewer_ld19.launch.py
+        ```
 
-   - Launch the sensor data viewer:
-     ```
-     ros2 launch ldlidar_stl_ros2 viewer_ld19.launch.py
-     ```
-
-   - To monitor the messages published on the topic, use the following command:
-     ```
-     ros2 topic echo /scan
-     ```
-   - To launch RViz and vizualize ROS topic messages, execute the following command:
-     ```
-    rviz2
-     ```
-     
-    You might need to setup rviz2, in that case, just go back to the instructional video above.
+    - To monitor the messages published on the topic, use the following command:
+        ```
+        ros2 topic echo /scan
+        ```
+    - To launch RViz and vizualize ROS topic messages, execute the following command:
+        ```
+        rviz2
+        ```     
+        You might need to setup RViz settings, in that case just go back to the instructional video above.
