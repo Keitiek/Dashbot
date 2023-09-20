@@ -15,3 +15,17 @@ Measuring Angle: 0°-360°
 - User guide: https://www.inno-maker.com
 - Product page: https://www.inno-maker.com/product/lidar-ld06/
 - Datasheet: https://www.inno-maker.com/wp-content/uploads/2020/11/LDROBOT_LD06_Datasheet.pdf
+- O
+
+## Terms and abbreviations
+
+- LiDAR: Light Detection and Ranging. A remote sensing method that uses light in the form of a pulsed laser to measure ranges (variable distances) to the Earth.
+- PWM: Pulse Width Modulation. PWM refers to controlling the optical output of a laser via manipulation of the source that drives the gain medium.
+
+## Communication and interface
+- ZH1.5T-4P 1.5mm standard socket has to be connected with external system for powersupply, rotation control and data output.
+
+## Installation and running
+- First, follow https://www.youtube.com/watch?v=OJWAsV6-0GE to the point. When LD06 is picked in the video, choose LD19 instead.
+- Then, run this command to see sensor data: ros2 launch ldlidar_stl_ros2 viewer_ld19.launch.py
+- To see messages published in the topic, run this command: ros2 topic echo /scan
