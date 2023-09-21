@@ -14,7 +14,7 @@ We are using Innomaker LiDAR_LD19 for our project.
 ## Useful Links
 - **Manufacturer:** [LDRobot](https://www.ldrobot.com)
 - **User Guide:** [Inno-Maker](https://www.inno-maker.com)
-- **Product Page:** [LiDAR_LD19](https://www.inno-maker.com/product/lidar-ld06/)
+- **Product Page:** [LiDAR_LD06 Official Page](https://www.inno-maker.com/product/lidar-ld06/), [LiDAR LD19 product page on elecrow.com](https://www.elecrow.com/download/product/SLD06360F/LD19_Development%20Manual_V2.3.pdf)
 - **Datasheet:** [Download Datasheet](https://www.inno-maker.com/wp-content/uploads/2020/11/LDROBOT_LD06_Datasheet.pdf)
 - **LDRobot Official GitHub Page:** [GitHub Repository](https://github.com/ldrobotSensorTeam/)
 
