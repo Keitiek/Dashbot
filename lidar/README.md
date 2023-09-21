@@ -50,7 +50,9 @@ To set up and run the LiDAR_LD19, follow these steps:
         ```     
         You might need to setup RViz settings, in that case just go back to the instructional video above.
 
-## tty Permission Error
+## Cannot open /dev/ttyUSB0: Permission denied - Error and Fix
+
+ Permission Error
 
 In case you see a tty0 permission error, it means that your OS is asking you to permit the port to be opened. You can do it manually by running chmod command from the instructional video above, or, if you want to give your user the permission permanently, add the user to tty and dialout groups.
 
@@ -58,7 +60,7 @@ You can check what groups the user is in, using this command:
 ```
 groups
 ```
-If `tty` and `dialout` are not in the list, then the user is not a part of these groups, and to add them, use this command:
+If `tty` and `dialout` are not in the list, then the user is not member of these groups, and to add them, use this command:
 
 ```
 sudo usermod -a -G tty [yourusername]
