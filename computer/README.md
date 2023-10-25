@@ -42,4 +42,34 @@ For power supply use power adapter. For communication, use USB-cable.
 
 ## Expansion Header J12 Pinout
 
-![Expansion Header J12 Pinout](./assets/Expansion_header_J12_pinout.png)
+[Source: JetsonHacks](https://jetsonhacks.com/nvidia-jetson-orin-nano-gpio-header-pinout/)
+
+By default, I2C and UART pins are assigned. All other pins (except power and ground) are assigned as GPIO. Pins labeled with other functions below are suggested functions.
+
+### Notes
+#### I2C
+Pins 3 and 5 are on I2C bus 7
+
+For detection:
+
+`$ sudo i2cdetect -y -r 7`
+
+Pins 27 and 28 are on I2C bus 1. For detection:
+
+`$ sudo i2cdetect -y -r 1`
+
+On I2C bus 1, there are existing devices on 0x40, 0x25. These are denoted as **UU** by i2cdetect
+
+#### 4-26-2023 – Preliminary
+- Same layout as Xavier NX
+- There are two GPIO bases 316 & 348. - All pins are based from 348
+- First number is the GPIO number within a GPIO controller
+- Second ( gpioXXXX ) is the global Linux GPIO number
+- Pin 15 – When configured as PWM:
+    - PWM chip sysfs directory: /sys/devices/3280000.pwm
+    - PWM ID within PWM chip: 0
+- Pin 33 – When configured as PWM:
+    - PWM chip sysfs directory: /sys/devices/32c0000.pwm
+    - PWM ID within PWM chip: 0
+
+![Expansion Header J12 Pinout source](./assets/Expansion_header_J12_pinout.png)
