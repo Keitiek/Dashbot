@@ -1,4 +1,7 @@
 
+## Communication and Interface
+- To interface with the LiDAR_LD19, connect the ZH1.5T-4P 1.5mm standard socket to an external system. This connection is required for power supply, rotation control, and data output.
+
 ## Components used
 
 Remote control: FS-i6
@@ -64,7 +67,7 @@ Arduino: Arduino MEGA2560
 https://dronebotworkshop.com/radio-control-arduino-car/
 
 
-## Sorces:
+## Sources:
 
 FS-i6 - https://www.flysky-cn.com/i6-gaishu
 FS-iA6B - https://www.rc-factory.eu/rc/prijimace/flysky-fs-ia6b
