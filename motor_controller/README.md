@@ -18,6 +18,7 @@ We are using Accelerated Systems Inc. BAC555 motor controller for our project al
 ## Manufacturer and Product Page
 - **Manufacturer:** [ASI](https://www.acceleratedsystems.com/)
 - **Product Page:** [ASI BAC555 Official Page](https://www.acceleratedsystems.com/products/electric-motor-controllers/bac355-bac555)
+- **User Manual** [User Manual](https://www.ebikes.ca/downloads/BAC500_Controller_Manual_Rev%201.0.pdf)
 - **ASI Controller Configuration (Eggrider) https://manual.eggrider.com/ebike_settings/asi/#required-asi-controller-configuration
 
 
