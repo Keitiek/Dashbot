@@ -4,16 +4,17 @@
 
 ## Components used
 
-Remote control: FS-i6
+Remote control: FS-i6S
 Recever: FS-iA6B
 Arduino: Arduino MEGA2560 
 
 ## Individual components key features
 
-# FS-i6
+# FS-i6S
 
-    Product Model: FS- i6 
-    Channels: 6 Models: fixed wing / glider / helicopter / boat 
+    Product Model: FS- i6S 
+    Channels: 10 
+    Models: quadcopter, robotics, engineering vehicles 
     Wireless frequency: 2.4GHz 
     Transmission power: <20 dBm 
     Wireless protocol: AFHDS 2A 
@@ -22,17 +23,18 @@ Arduino: Arduino MEGA2560
     Battery: 1.5AA * 4 
     Charging port: None 
     Low voltage alarm: ＜ 4.2V 
-    Antenna type: dual antenna 
-    Display: STN transflective display, LCD 128x64 dot matrix, 
+    Antenna type: Built-in dual antenna 
+    Display: capacitive touch screen 
     Language: Chinese and English 
+    USB simulator compatibility: USB emulator 
     Data port: PS / 2 (PPM) 
     Temperature range: -10 ℃ — + 60 ℃ 
-    Humidity range: 20% -95% 
+    Humidity range: 20% - 95% 
     Online Update: Yes 
-    Remote Control Color: Black 
-    Dimensions: 174x89x190mm 
-    Weight: 392g 
-    Certification: CE, RCM, PAHS, FCC ID: N4ZFLYSKYI6
+    Remote Control Color: white 
+    Dimensions: 179mm x 81mmx 161mm 
+    Weight: 410g 
+    Certification: CE, RCM, FCC ID: N4ZFLYSKYI6S
 
 
 # FS-iA6B
