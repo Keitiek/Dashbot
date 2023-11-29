@@ -9,10 +9,17 @@
 
 const long baudRate = 115200;
 
-const int throttlePin = 2; 
-const int throttlePinFaster = 11;
-const int motorPin1 = 7;
-const int motorPin2 = 5;
+struct Speed {
+  int left;
+  int right;
+};
+
+Speed currentSpeed;
+
+const int throttlePinRight = 2; 
+const int throttlePinLeft = 11;
+const int cruisePinRight = 7;
+const int cruisePinLeft = 5;
 
 const int leftRightChannel = 0;
 const int breakThrottleChannel = 2;
@@ -31,42 +38,42 @@ int readChannel(byte channelInput, int minLimit, int maxLimit, int defaultValue)
   return map(readValue, 1000, 2000, minLimit, maxLimit);
 }
 
-// Read the channel and return a boolean value
-bool readSwitch(byte channelInput, bool defaultValue) {
-  int intDefaultValue = (defaultValue) ? 100 : 0;
-  int readValue = readChannel(channelInput, 0, 100, intDefaultValue);
-  return (readValue > 50);
-}
-
 void setup() {
   Serial.begin(baudRate);
-  pinMode(motorPin1, OUTPUT); 
-  pinMode(motorPin2, OUTPUT); 
+  pinMode(cruisePinRight, OUTPUT); 
+  pinMode(cruisePinLeft, OUTPUT); 
   // Attach iBus object to serial port
   ibus.begin(Serial1);
+
+  currentSpeed.left = 0;
+  currentSpeed.right = 0;
 }
 
-void loop() {
+int lastTurningValue = 0;
+int currentTurningValue = 0;
+
+void loop() {  
   for (byte channel = 0; channel <= numberOfChannelsWeAreInterestedIn; channel++) {
+    
     int value = readChannel(channel, -100, 100, 0);
-
-  // Throttle and break
+    
+    // Throttle and break
     if(channel == breakThrottleChannel){
-      if(value > 10){ // throttle // todo: the greater the throttle value, the more speed should be added
-        forward();
-      } else { // speed to 0 // todo: break so that it stops even if going downhill
-        breakk();
+      if (value >= 0){
+        forward(value);
       } 
+    } 
 
-  // Turning left and right
-    } else if(channel == leftRightChannel){
-        if(value < -50){
-        turnLeft();
-      } if(value > 50) {
-        turnRight();
-      } 
-  // Driving forward or reversing
-    } else if(channel == forwardReverseChannel) {
+     if (channel == leftRightChannel){
+      if (value != 0) {
+        adjustTurning(value);
+        sendSpeedSignalToMotors();
+      }
+    }
+     
+    // Driving forward or reversing
+    /*
+    if(channel == forwardReverseChannel) {
       if(value > 0){
         reverse();
       } else if(value == 0) {
@@ -74,67 +81,68 @@ void loop() {
       } else{
         Serial.print("FORWARD | ");
       }
-  // Turning lights on and off
-    } else if(channel == lightsOffOnChannel){
+    }
+    */
+    // Turning lights on and off 
+
+    /*
+    if(channel == lightsOffOnChannel){
       if(value < 0){
-        Serial.print("LIGHTS OFF | ");
+       // Serial.print("LIGHTS OFF | ");
       } else {
         Serial.print("LIGHTS ON | ");
       }
     }
+    */
   }
-  Serial.println();
+  sendSpeedSignalToMotors();
   delay(10);
 }
 
-void turnLeft() {
-  Serial.print("LEFT | ");
-  digitalWrite(motorPin1, HIGH);
-  digitalWrite(motorPin2, LOW);
-  analogWrite(throttlePin, 30);
-  analogWrite(throttlePinFaster, 31);
+void adjustTurning(int value) {
+  int turnSpeedLeft = 0;
+  int turnSpeedRight = 0;
+  if(value < 0){
+    turnSpeedLeft = map(value, 0, -100, 0, 255);
+    currentSpeed.right += (turnSpeedLeft );
+  } else {
+    turnSpeedRight = map(value, 0, 100, 0, 255);
+    currentSpeed.left += (turnSpeedRight);
+  }
+    
+  currentSpeed.left = constrain(currentSpeed.left, 0, 255);
+  currentSpeed.right = constrain(currentSpeed.right, 0, 255);
 }
 
-void turnRight(){
-  Serial.print("RIGHT | ");
-  digitalWrite(motorPin1, LOW);
-  digitalWrite(motorPin2, HIGH);
-  analogWrite(throttlePin, 30);
-  analogWrite(throttlePinFaster, 31);
+void forward(int value){
+  int leftSpeed = map(value, 0, 100, 0, 255);
+  int rightSpeed = map(value, 0, 100, 0, 255);
+  currentSpeed.right = rightSpeed; 
+  currentSpeed.left = leftSpeed;
 }
 
-void forward(){
-  Serial.print("THROTTLE | ");
-  digitalWrite(motorPin1, HIGH);
-  digitalWrite(motorPin2, HIGH);
-  analogWrite(throttlePin, 30);
-  analogWrite(throttlePinFaster, 31);  
+void sendSpeedSignalToMotors(){
+  digitalWrite(cruisePinRight, LOW);
+  digitalWrite(cruisePinLeft, LOW);
+  
+  Serial.print("RIGHT value | ");
+  Serial.println(currentSpeed.right);
+
+  Serial.print("LEFT value | ");
+  Serial.println(currentSpeed.left);
+  
+  analogWrite(throttlePinRight, currentSpeed.right);
+  analogWrite(throttlePinLeft, currentSpeed.left);  
 }
 
-void breakk(){ // this is not a typo, break() is seen as an inbuilt function so we need another function name for our code to work as intended :)
-  Serial.print("BREAK | ");
-  digitalWrite(motorPin1, HIGH);
-  digitalWrite(motorPin2, HIGH);
-  analogWrite(throttlePin, 0);
-  analogWrite(throttlePinFaster, 0); 
-}
-
-void reverse(){
+// braking at speed 0 happens because of BAC settings (activated in kilowatt app). 
+// If the throttle has a low value, the break applies automatically.
+ 
+// todo: modify to use reverse
+void reverse(int value){
   Serial.print("REVERSE | ");
-  digitalWrite(motorPin1, LOW);
-  digitalWrite(motorPin2, LOW);
-  analogWrite(throttlePin, 30);
-  analogWrite(throttlePinFaster, 31);
-}
-
-// todo: rewrite and use for motor speed control 
-void setMotorPower(int value){
-  value = constrain(value, 0, 100);
-  int pwmValue = map(value, 0, 100, 0, 255);
-
-  analogWrite(motorPin1, value);
-  analogWrite(motorPin2, value);
-
-  Serial.print("Motor power: ");
-  Serial.println(value);
+  int leftSpeed = map(value, 0, -100, 0, -255);
+  int rightSpeed = map(value, 0, -100, 0, -255);
+  currentSpeed.right = rightSpeed; 
+  currentSpeed.left = leftSpeed;
 }

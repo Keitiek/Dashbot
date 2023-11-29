@@ -1,8 +1,4 @@
-
-## Communication and Interface
-- To interface with the LiDAR_LD19, connect the ZH1.5T-4P 1.5mm standard socket to an external system. This connection is required for power supply, rotation control, and data output.
-
-## Components used
+## Remote Controller
 
 Remote control: FS-i6S
 Recever: FS-iA6B
