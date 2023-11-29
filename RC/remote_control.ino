@@ -146,6 +146,3 @@ void reverse(int value){
   currentSpeed.right = rightSpeed; 
   currentSpeed.left = leftSpeed;
 }
-
-// next steps in hardware: wires repairs, jetson pocket, waterproof the electronics, base for cargo, cargo ties 
-// next steps in code: apply reverse, teleop: control over ros, attach camera
