@@ -45,7 +45,11 @@ Xvfb :1 -screen 0 1024x768x16
 ```ssh
 ps -ef | grep Xvfb
 ```
-- ssh into remote machine and start Arduino:
+- ssh into remote machine:
+```ssh
+ssh -X [username]@[ip address] # -X or -Y
+```
+- start Arduino:
 ```ssh
 arduino
 ```
