@@ -30,3 +30,6 @@ apt show ros-foxy-desktop
 ```sh
 ros2 run demo_nodes_cpp talker
 ```
+```sh
+ros2 run demo_nodes_cpp listener
+```
