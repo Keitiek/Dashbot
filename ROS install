@@ -1,87 +1,32 @@
-ROS 2 installimine
+# Installing Foxy distribution 
 
-
-*https://docs.ros.org/en/dashing/Installation/Ubuntu-Install-Binary.html
-*sudo apt update && sudo apt install curl gnupg2 lsb-release
-*sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key  -o /usr/share/keyrings/ros-archive-keyring.gpg
-*echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
-*mkdir -p ~/ros2_dashing
-*cd ~/ros2_dashing
-*tar xf ~/Downloads/ros2-dashing-linux-x86_64.tar.bz2
-*sudo apt update
-*sudo apt install -y python-rosdep
-
-
-*tar xf ~/Downloads/ros2-iron-20230912-linux-jammy-amd64.tar.bz2
-*cd
-Üleval olev oli valesti installitud kuna ei ühildunud süsteemiga sai need maha installitud 
-
-*https://docs.ros.org/en/humble/Installation/Alternatives/Ubuntu-Development-Setup.html#try-some-examples
-*locale  # check for UTF-8
-*sudo apt update && sudo apt install locales
-*sudo locale-gen en_US en_US.UTF-8
-*sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
-*export LANG=en_US.UTF-8
-*locale  # verify settings
-*sudo apt install software-properties-common
-*sudo add-apt-repository universe
-*sudo apt update && sudo apt install curl -y
-*sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key -o /usr/share/keyrings/ros-archive-keyring.gpg
-*echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
-*python3 -m pip install -U \ flake8-blind-except \ flake8-builtins \ flake8-class-newline \ flake8-comprehensions \ flake8-deprecated \ flake8-import-order \ flake8-quotes \ "pytest>=5.3" \ pytest-repeat \ pytest-rerunfailures
-*python3 -m pip install --upgrade pip
-*mkdir -p ~/ros2_humble/src
-*cd ~/ros2_humble
-*vcs import --input https://raw.githubusercontent.com/ros2/ros2/humble/ros2.repos src
-*sudo apt-get install python3-vcstool
-*vcs import --input https://raw.githubusercontent.com/ros2/ros2/humble/ros2.repos src
-*sudo apt upgrade
-*sudo rosdep init
-*rm -rf /etc/ros/rosdep/sources.list.d/*
-*sudo rosdep init
-*rosdep update
-*rosdep install --from-paths src --ignore-src -y --skip-keys "fastcdr rti-connext-dds-6.0.1 urdfdom_headers"
-*cd ~/ros2_humble/
-*colcon build --symlink-install
-*sudo apt install python3-colcon-common-extensions
-*cd ~/ros2_humble/
-*colcon build --symlink-install
-*. ~/ros2_humble/install/local_setup.bash
-
-Testing if RSO2 works - ühes terminalis
-*. ~/ros2_humble/install/local_setup.bash
-*ros2 run demo_nodes_cpp talker
-Teises terminalis
-
-*. ~/ros2_humble/install/local_setup.bash
-*ros2 run demo_nodes_py listener
-
-PYTHON ERROR ja lahendus:
-CMake Error at /usr/share/cmake-3.16/Modules/FindPackageHandleStandardArgs.cmake:146 (message):
-  Could NOT find Python3 (missing: Development) (found suitable version
-  "3.9.5", minimum required is "3.8")
-
-dashbot@dashbot:~/ros2_humble$ ll /usr/lib/python
-python2.7/ python3/   python3.8/ python3.9/ 
-dashbot@dashbot:~/ros2_humble$ ll /usr/lib/python3.9/
-total 4948 <- seda on liiga palju! aga see pole oluline, nii et kustutame Pythoni ära
-
-dashbot@dashbot:~/ros2_humble$ sudo apt-get clean
-[sudo] password for dashbot: 
-dashbot@dashbot:~/ros2_humble$ sudo apt-get autoremove --purge
-Reading package lists... Done
-Building dependency tree       
-Reading state information... Done
-0 upgraded, 0 newly installed, 0 to remove and 2 not upgraded.
-dashbot@dashbot:~/ros2_humble$ sudo apt-get remove python3.9
-dashbot@dashbot:~/ros2_humble$ sudo apt-get autoremove
-
-niiviisi eemaldasime pythoni 
-dashbot@dashbot:~/ros2_humble$ ll /usr/lib/python3.9/
-total 32
-
-siinkohal ära unusta minna õigesse kausta: ros2_humble  
-dashbot@dashbot:~/ros2_humble$ colcon build --symlink-install --cmake-args -DPYTHON_EXECUTABLE=/usr/bin/python3.8
-
-Summary: 344 packages finished [1h 25min 26s]
-Kui sihuke kiri ees, siis oh seda rõõmu! Kõik läks seekord kenasti.
+```sh
+rm -rf ~/ros2_humble/
+```
+```sh
+sudo apt-get update
+```
+```sh
+sudo apt install ros-foxy-desktop
+```
+```sh
+source /opt/ros/foxy/setup.bash
+```
+```sh
+echo /opt/ros/foxy/setup.bash
+```
+```sh
+echo "source /opt/ros/foxy/setup.bash"
+```
+```sh
+sudo apt install python3-argcomplete
+```
+```sh
+sudo apt install python3-colcon-common-extensions
+```
+```sh
+apt show ros-foxy-desktop
+```
+```sh
+ros2 run demo_nodes_cpp talker
+```
