@@ -1,4 +1,4 @@
-## We are using ROS2 Humble distribution.
+## We are using ROS2 Foxy distribution.
 
 ### Basic ROS commands:
 
@@ -9,9 +9,5 @@
 - _rviz2_ - open RViz
 - _ros2 run teleop_twist_keyboard teleop_twist_keyboard_ - running keyboard teleop
 - _ros2 topic list_ - shows the list of topics running 
-
-### Work History
-To use keyboard teleop, we cloned teleop_twist_keyboard package: 
-
 
 ![ROS architecture draft](../assets/ros_architecture.png)
