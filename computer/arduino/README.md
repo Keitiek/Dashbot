@@ -10,3 +10,4 @@ https://github.com/JetsonHacksNano/installArduinoIDE, and installed it.
 
 ## Communication
 - IBusBM.h library for reading IBus data
+- USB 2.0 type A/B 1M for forwarding Serial data from Jetson to Arduino
