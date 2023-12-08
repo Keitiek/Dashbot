@@ -31,9 +31,10 @@ java.awt.AWTError: Can't connect to X11 window server using '10.0.3.174:0' as th
 ## Solution
 
 The basis for the solution came from here: https://www.linuxquestions.org/questions/linux-general-1/can%27t-connect-to-x11-window-server-using-%27-0-0%27-as-the-value-of-the-display-variable-178234/
-Steps for problem solving:
 
-- download Xvfb:
+### Steps for problem solving:
+
+- download Xvfb to local machine:
 ```ssh
 sudo apt-get install xvfb
 ```
@@ -49,7 +50,7 @@ ps -ef | grep Xvfb
 ```ssh
 ssh -X [username]@[ip address] # -X or -Y
 ```
-- start Arduino:
+- start Arduino on local machine:
 ```ssh
 arduino
 ```
