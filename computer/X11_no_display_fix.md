@@ -1,6 +1,6 @@
 ## Problem Description
 
-After ssh-ing into Jetson, I wanted to start Arduino GUI but was getting this error:
+After ssh-ing into Jetson, I wanted to start Arduino GUI on my local machine but was getting this error:
 
 ```ssh
 Picked up JAVA_TOOL_OPTIONS: 
