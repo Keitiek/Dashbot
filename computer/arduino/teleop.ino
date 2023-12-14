@@ -1,9 +1,6 @@
-#include <ros.h>
-#include <std_msgs/String.h>
+#include <stdlib.h>
 #include <IBusBM.h>
 
-ros::NodeHandle nh;
-std_msgs::String ros_msg;
 const long baudRate = 115200;
 
 struct Speed {
@@ -29,6 +26,8 @@ void setup() {
 }
 
 void forward(int value){
+  Serial.print("incoming value is ");
+  Serial.println(value);
   int leftSpeed = map(value, 0, 100, 0, 255);
   int rightSpeed = map(value, 0, 100, 0, 255);
   currentSpeed.right = rightSpeed; 
@@ -51,27 +50,27 @@ void sendSpeedSignalToMotors(){
 
 void loop() {
   if (Serial.available() > 0) {
-    //byte buffer[1];
-    // Serial.readBytes(buffer, 1);
-    char receivedChar = Serial.read();
-    
-    // char receivedChar = (char)buffer[0];
-    
-    Serial.print("Received Char: ");
-    Serial.println(receivedChar);
+    String receivedString = Serial.readStringUntil('\n');
+    receivedString.trim();
 
-    if (receivedChar == 'i') {
-      Serial.println("FORWARD!");
-      forward(15);
-      sendSpeedSignalToMotors();
-      delay(10);
-    } else {
+    int integerValue = atoi(receivedString.c_str());
+
+    Serial.print("integerValue: ");
+    Serial.println(integerValue);
+    
+    if (integerValue == 0) {
       Serial.println("stop!");
       currentSpeed.left = 0;
       currentSpeed.right = 0;
       sendSpeedSignalToMotors();
       delay(10);
+    } else if (0 < integerValue < 100) {
+      Serial.println("FORWARD!");
+      forward(integerValue);
+      sendSpeedSignalToMotors();
+      delay(10);
+    } else {
+      Serial.println("Unknown command");
     }
   }  
-  nh.spinOnce();
 }
