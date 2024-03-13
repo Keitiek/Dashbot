@@ -9,3 +9,5 @@ In our second year second semester we are going to make the bot fully autonomous
 Links:
 * Lab Diary: https://docs.google.com/document/d/1k4zGNElfIEvhm66o9c2Qz7obtGh0yeYQ0cZfCKrCHxU/edit
 * Initial Document : https://docs.google.com/document/d/1Y4k4K5Uz_eEKPzYucG88JseUbh_P795UTVBd52koccg/edit?usp=sharing
+* Jorm praktik päevik : https://docs.google.com/document/d/1xkvWcEpAi865ao7pIB37OrQLByFsOyWK0aJ9Dl49NfE/edit
+* Keiti praktika päevik : https://docs.google.com/document/d/1xprU2KRviG-MKZRc5bd9-_p7dQB3C4okA2XCdr9rKTM/edit
