@@ -1,7 +1,7 @@
 #include <IBusBM.h>
 #include <stdlib.h>
 
-#include "Differential_Drive_Kinematics.hpp"
+#include "DifferentialDriveKinematics.hpp"
 #include "FlySkyChannelDefinitions.hpp"
 #include "PinDefinitions.hpp"
 #include "MotorController.hpp"
@@ -23,7 +23,7 @@ Signals signals;
 // the incoming speed values sent over serial connection (-2.8 to -2.8)
 Values values;
 
-// Speeds is imported from Differential_Drive_Kinematics, calculates the desired speeds
+// Speeds is imported from DifferentialDriveKinematics, calculates the desired speeds
 // based on incoming linear x and angular z from FlySky
 Speeds speeds;
 
@@ -54,7 +54,7 @@ void loop() {
     int brakeThrottleValue = readIBusChannel(ibus, brakeThrottleChannel, -28, 28, 0); // linear x
     int leftRightValue = readIBusChannel(ibus, leftRightChannel, -28, 28, 0); // angular z
 
-    speeds = Differential_Drive_Kinematics(brakeThrottleValue / 10.0, leftRightValue / 10.0);
+    speeds = DifferentialDriveKinematics(brakeThrottleValue / 10.0, leftRightValue / 10.0);
   }
 
   Serial.print("speeds.right: ");
