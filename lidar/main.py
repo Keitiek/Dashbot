@@ -17,71 +17,26 @@ class ScanSubscriber(Node):
         print("Received scan data:")
         print("Minimum range value", msg.range_min)
         print("Maximum range value", msg.range_max)
-
         print("Array Length", len(msg.ranges))
-
-        # Get array length
-        array_len = len(msg.ranges)
-
-        # Divide the length by eight (for 8 segments)
-        divided_by_eight = array_len // 8
-
-        # Get the data for 0 to 45 degrees
-        first_quarter = msg.ranges[:divided_by_eight]
-
-        # Get the data for 45 to 90 degrees
-        second_quarter_start = divided_by_eight
-        second_quarter_end = 2 * divided_by_eight
-        second_quarter = msg.ranges[second_quarter_start:second_quarter_end]
-
-        # Get the data for 270 to 315 degrees
-        seventh_quarter_start = 6 * divided_by_eight
-        seventh_quarter_end = 7 * divided_by_eight
-        seventh_quarter = msg.ranges[seventh_quarter_start:seventh_quarter_end]
-
-        # Get the data for 315 to 360 degrees
-        last_quarter = msg.ranges[-divided_by_eight:]
-
-        print("Array Length:", array_len)
-        print("First quarter:", len(first_quarter))
-        print("Second quarter:", len(second_quarter))
-        print("Seventh quarter:", len(seventh_quarter))
-        print("Last quarter:", len(last_quarter))
-
-        # Print "Stop" for ranges 0-45 degrees if distance is <= 1.0m
-        for i, range_value in enumerate(first_quarter):
-            print(f"Range {i}: {range_value}")
+        array_length = 16
+        array = [0] * array_length
+       # print(array)
+        
+        for i, range_value in enumerate(msg.ranges):
             if range_value <= 1.0:
-                print("Stop  0-45 ")
-                print(" 1m ")
-
-        # Print "Stop" for ranges 45-90 degrees if distance is <= 0.3m
-        for i, range_value in enumerate(second_quarter):
-            adjusted_index = second_quarter_start + i
-            print(f"Range {adjusted_index}: {range_value}")
-            if range_value <= 0.3:
-                print("Stop 45-90")
-                print(" 30cm ")
-
-
-        # Print "Stop" for ranges 270-315 degrees if distance is <= 0.3m
-        for i, range_value in enumerate(seventh_quarter):
-            adjusted_index = seventh_quarter_start + i
-            print(f"Range {adjusted_index}: {range_value}")
-            if range_value <= 0.3:
-                print("Stop 270-315")
-                print(" 30cm ")
-
-
-        # Print "Stop" for ranges 315-360 degrees if distance is <= 1.0m
-        for i, range_value in enumerate(last_quarter):
-            adjusted_index = array_len - divided_by_eight + i
-            print(f"Range {adjusted_index}: {range_value}")
-            if range_value <= 1.0:
-                print("Stop 315-360")
-                print(" 1m ")
-
-
+                index = int(i * array_length / len(msg.ranges))  # calculating index, what sector the range will go
+                print(index)
+                if index == 3 or index == 2 or index == 12 or index == 13:
+                    if range_value <= 0.3:
+                        array[index] = True
+                if index == 1 or index == 0 or index == 15 or index == 14: 
+                    if range_value <= 1.0:
+                        array[index] = True
+                    
+        #print(array)
+        eight_array = [array[3], array[2], array[1], array[0], array[15],array[14], array[13], array[12]]
+        print(eight_array)
+              
 
 def main(args=None):
     rclpy.init(args=args)
