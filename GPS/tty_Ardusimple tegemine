@@ -9,3 +9,6 @@ sudo service udev restart
 sudo udevadm trigger
 
 ls /dev/
+
+
+https://www.ardusimple.com/how-to-use-ardusimple-rtk-receivers-and-get-gps-data-in-ros/
