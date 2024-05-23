@@ -16,7 +16,14 @@ alt0 = 91.357
 
 base_point = Point(lat0, lon0)
 
-print(base_point.lat)
+#print(base_point.lat)
+
+lat1 = 58.342035
+lon1 = 25.568843166666667
+
+home_point = Point(lat1, lon1)
+
+#print(home_point.lon)
 
 lat = 58.34221
 lon = 25.5680983
@@ -32,7 +39,7 @@ def open_serial_port(ports):
     return None
 
 def write_data_to_file(gps_data):
-    with open('coordinates_TEST1.txt', 'a') as f:  # changed to append mode
+    with open('coordinates.txt', 'a') as f:  # changed to append mode
         f.write(f"{gps_data['latitude']},{gps_data['longitude']},{gps_data['altitude']}\n")
     
 def print_gps_data(gps_data):
@@ -71,7 +78,7 @@ def quadrant(E, N):
     else:
         return 0
 
-ports_to_try = ['/dev/ttyACM0']
+ports_to_try = ['/dev/tty_Ardusimple']
                 
 ser = open_serial_port(ports_to_try)
 
