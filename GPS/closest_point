@@ -1,0 +1,61 @@
+import time
+
+def closest(lst, K, used_k_values, start_index=0):
+    lst = [tuple(map(float, x.split(','))) for x in lst]
+    K = tuple(map(float, K.split(',')))
+    min_distance = float('inf')
+    closest_val = None
+    closest_idx = -1
+    
+    for i in range(start_index, len(lst)):
+        if ','.join(map(str, lst[i])) not in used_k_values:
+            distance = abs(lst[i][0] - K[0]) + abs(lst[i][1] - K[1]) + abs(lst[i][2] - K[2])
+            if distance < min_distance:
+                min_distance = distance
+                closest_val = lst[i]
+                closest_idx = i  # Track the index of the closest value
+    
+    return closest_val, closest_idx
+
+def read_coordinates(filename):
+    lst = []
+    with open(filename, 'r') as file:
+        for line in file:
+            line = line.strip()
+            if not line.startswith('0.0,0.0,None'):
+                lst.append(line)
+    return lst
+
+def execute(filename='coordinates4.txt', initial_K='58.342035,25.568843166666667,58.6', max_iterations=10):
+    lst = read_coordinates(filename)
+    K = initial_K
+    used_k_values = set()
+    used_k_values.add(K)
+
+    iterations = 0
+    start_index = 0
+
+    while iterations < max_iterations:
+        closest_value, closest_idx = closest(lst, K, used_k_values, start_index)
+        
+        if closest_value is None:
+            print("No unused closest value found. Exiting the loop.")
+            break
+
+        closest_value_str = ','.join(map(str, closest_value))
+        print(f"Closest value to K ({K}): {closest_value}")
+
+        K = closest_value_str
+        used_k_values.add(K)
+
+        # Update start_index to ensure coordinates above the found one are ignored
+        start_index = closest_idx + 1
+        print(f"Updated K: {K}")
+
+        time.sleep(1)
+        iterations += 1
+
+    print("Completed the loop")
+
+if __name__ == '__main__':
+    execute()
