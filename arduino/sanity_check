@@ -1,0 +1,39 @@
+const int aHallLeft = 40;
+const int bHallLeft = 41;
+const int cHallLeft = 42;
+
+const int aHallRight = 26;
+const int bHallRight = 27;
+const int cHallRight = 28;
+
+void setup() {
+  Serial.begin(115200); // Initialize Serial communication at 9600 baud
+
+  pinMode(aHallLeft, INPUT); // Hall sensor A for left motor
+  pinMode(bHallLeft, INPUT); // Hall sensor B for left motor
+  pinMode(cHallLeft, INPUT); // Hall sensor C for left motor
+
+  pinMode(aHallRight, INPUT); // Hall sensor A for left motor
+  pinMode(bHallRight, INPUT); // Hall sensor B for left motor
+  pinMode(cHallRight, INPUT); // Hall sensor C for left motor
+}
+
+void loop() {
+  int currentAHallLeftState = digitalRead(aHallLeft);
+  int currentBHallLeftState = digitalRead(bHallLeft);
+  int currentCHallLeftState = digitalRead(cHallLeft);
+  
+  int currentAHallRightState = digitalRead(aHallRight);
+  int currentBHallRightState = digitalRead(bHallRight);
+  int currentCHallRightState = digitalRead(cHallRight);
+  
+  Serial.print("Left Hall A: "); Serial.println(currentAHallLeftState);
+  Serial.print("Left Hall B: "); Serial.println(currentBHallLeftState);
+  Serial.print("Left Hall C: "); Serial.println(currentCHallLeftState);
+  
+  Serial.print("Right Hall A: "); Serial.println(currentAHallRightState);
+  Serial.print("Right Hall B: "); Serial.println(currentBHallRightState);
+  Serial.print("Right Hall C: "); Serial.println(currentCHallRightState);
+  
+  delay(1000);  // Delay to make the output readable
+}
