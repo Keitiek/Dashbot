@@ -1,4 +1,4 @@
-[Link Text](https://www.ardusimple.com/how-to-use-ardusimple-rtk-receivers-and-get-gps-data-in-ros/)
+[ArduSimple RTK: reading GPS data in ROS](https://www.ardusimple.com/how-to-use-ardusimple-rtk-receivers-and-get-gps-data-in-ros/)
 
 `sudo nano /etc/udev/rules.d/50-ardusimple.rules`
 
