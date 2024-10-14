@@ -1,0 +1,15 @@
+[Link Text](https://www.ardusimple.com/how-to-use-ardusimple-rtk-receivers-and-get-gps-data-in-ros/)
+
+`sudo nano /etc/udev/rules.d/50-ardusimple.rules`
+
+`KERNEL=="ttyACM[0-9]*", ATTRS{idVendor}=="1546", ATTRS{idProduct}=="01a9", SYMLINK="tty_Ardusimple", GROUP="dialout", MODE="0666"`
+
+`sudo service udev reload`
+
+`sudo service udev restart`
+
+`sudo udevadm trigger`
+
+`ls /dev/`
+
+
