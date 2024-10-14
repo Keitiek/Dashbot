@@ -1,5 +1,3 @@
-[ArduSimple RTK: reading GPS data in ROS](https://www.ardusimple.com/how-to-use-ardusimple-rtk-receivers-and-get-gps-data-in-ros/)
-
 Steps:
 
 - connect the GPS USB
@@ -17,3 +15,5 @@ Steps:
 >`ls /dev/`
 
 The successful end result is seeing `tty_Ardusimple` in the list.
+
+[Source](https://www.ardusimple.com/how-to-use-ardusimple-rtk-receivers-and-get-gps-data-in-ros/)
