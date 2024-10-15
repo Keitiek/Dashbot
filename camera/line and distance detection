@@ -29,6 +29,9 @@ if not camera.isOpened():
 
 # Function for calculating lane lines
 def average_slope_intercept(lines):
+    if lines is None or len(lines) == 0:
+        return None, None
+    
     left_lines = []  # (slope, intercept)
     left_weights = []  # (length,)
     right_lines = []  # (slope, intercept)
@@ -65,6 +68,9 @@ def pixel_points(y1, y2, line):
     return ((x1, int(y1)), (x2, int(y2)))
 
 def lane_lines(image, lines):
+    if lines is None or len(lines) == 0:
+        return None, None
+    
     left_lane, right_lane = average_slope_intercept(lines)
     y1 = image.shape[0]
     y2 = y1 * 0.3
@@ -76,7 +82,11 @@ def draw_lane_lines(image, lines, color=[255, 255, 0], thickness=12):
     line_image = np.zeros_like(image)
     for line in lines:
         if line is not None:
-            cv2.line(line_image, *line, color, thickness)
+            pt1, pt2 = line
+            if isinstance(pt1, tuple) and isinstance(pt2, tuple):
+                pt1 = tuple(map(int, pt1))
+                pt2 = tuple(map(int, pt2))
+                cv2.line(line_image, pt1, pt2, color, thickness)
     return cv2.addWeighted(image, 1.0, line_image, 1.0, 0.0)
 
 # Main loop for video stream processing
