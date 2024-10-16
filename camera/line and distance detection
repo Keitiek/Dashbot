@@ -89,6 +89,20 @@ def draw_lane_lines(image, lines, color=[255, 255, 0], thickness=12):
                 cv2.line(line_image, pt1, pt2, color, thickness)
     return cv2.addWeighted(image, 1.0, line_image, 1.0, 0.0)
 
+lane_history = []  # Buffer to store lane line coordinates over the last N frames
+N = 5  # Number of frames to average over
+
+def average_lanes(lane_history):
+    left_lines = [lane[0] for lane in lane_history if lane[0] is not None]
+    right_lines = [lane[1] for lane in lane_history if lane[1] is not None]
+    
+    left_avg = np.mean(left_lines, axis=0) if len(left_lines) > 0 else None
+    right_avg = np.mean(right_lines, axis=0) if len(right_lines) > 0 else None
+    return left_avg, right_avg
+
+road_not_detected_counter = 20  # Counter for frames where road is not detected
+MAX_FRAMES_WITHOUT_LANES = 20  # Number of frames to consider before triggering "no road"
+
 # Main loop for video stream processing
 while True:
     ret, frame = camera.read()
@@ -154,6 +168,10 @@ while True:
         # Display the overlay text in a column, separated by 'line_height' for each object
         text_y = start_y + idx * line_height
         cv2.putText(frame, overlay_text, (10, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 2)
+        
+        # Begining of the stop if object infront of robot part of the code
+        if distance <= 1.0:
+            cv2.putText(frame, "STOP!", (250, 250), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 3)
 
     # --- Line Detection Process ---
     # Convert the frame to HSV color space for white color segmentation
@@ -190,10 +208,33 @@ while True:
     # Use masked_edges instead of edges in HoughLinesP
     lines = cv2.HoughLinesP(masked_edges, 5, np.pi / 180, threshold=100, minLineLength=40, maxLineGap=40)
 
+    lane_line_coords = lane_lines(frame, lines)
+    
+    # Inside the main loop after detecting lane lines:
+    lane_line_coords = lane_lines(frame, lines)
+    lane_history.append(lane_line_coords)
+
+    if len(lane_history) > N:
+        lane_history.pop(0)
+
+    smoothed_lane_coords = average_lanes(lane_history)
+    frame = draw_lane_lines(frame, smoothed_lane_coords)
+    
+    if lane_line_coords[0] is None and lane_line_coords[1] is None:
+        road_not_detected_counter += 1
+    else:
+        road_not_detected_counter = 0
+        
+    if road_not_detected_counter >= MAX_FRAMES_WITHOUT_LANES:
+        cv2.putText(frame, "Warning: Road not detected!", (50, 300), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
+    #else:
+    #    road_not_detected_counter = 0
+    
+    frame = draw_lane_lines(frame, lane_line_coords)
     # Draw lane lines
-    if lines is not None:
-        lane_line_coords = lane_lines(frame, lines)
-        frame = draw_lane_lines(frame, lane_line_coords)
+    #if lines is not None:
+    #    lane_line_coords = lane_lines(frame, lines)
+    #    frame = draw_lane_lines(frame, lane_line_coords)
 
     # Show the frame with the detected objects and lane lines
     cv2.imshow('People, Truck Detection, and Lane Detection', frame)
@@ -202,26 +243,26 @@ while True:
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-lane_history = []  # Buffer to store lane line coordinates over the last N frames
-N = 5  # Number of frames to average over
+#lane_history = []  # Buffer to store lane line coordinates over the last N frames
+#N = 5  # Number of frames to average over
+#
+#def average_lanes(lane_history):
+#    left_lines = [lane[0] for lane in lane_history if lane[0] is not None]
+#    right_lines = [lane[1] for lane in lane_history if lane[1] is not None]
+#    
+#    left_avg = np.mean(left_lines, axis=0) if len(left_lines) > 0 else None
+#    right_avg = np.mean(right_lines, axis=0) if len(right_lines) > 0 else None
+#    return left_avg, right_avg
 
-def average_lanes(lane_history):
-    left_lines = [lane[0] for lane in lane_history if lane[0] is not None]
-    right_lines = [lane[1] for lane in lane_history if lane[1] is not None]
-    
-    left_avg = np.mean(left_lines, axis=0) if len(left_lines) > 0 else None
-    right_avg = np.mean(right_lines, axis=0) if len(right_lines) > 0 else None
-    return left_avg, right_avg
-
-# Inside the main loop after detecting lane lines:
-lane_line_coords = lane_lines(frame, lines)
-lane_history.append(lane_line_coords)
-
-if len(lane_history) > N:
-    lane_history.pop(0)
-
-smoothed_lane_coords = average_lanes(lane_history)
-frame = draw_lane_lines(frame, smoothed_lane_coords)
+## Inside the main loop after detecting lane lines:
+#lane_line_coords = lane_lines(frame, lines)
+#lane_history.append(lane_line_coords)
+#
+#if len(lane_history) > N:
+#    lane_history.pop(0)
+#
+#smoothed_lane_coords = average_lanes(lane_history)
+#frame = draw_lane_lines(frame, smoothed_lane_coords)
 
 # Release the camera and close the window
 camera.release()
