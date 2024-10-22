@@ -9,7 +9,7 @@ model = YOLO('yolov8n.pt')
 class_names = model.names  # List of class names, indexed by class ID
 
 # Camera parameters (corrected) #Come back to later
-FOCAL_LENGTH = 5000  # Focal length in mm (typical for See3CAM_CU20)
+FOCAL_LENGTH = 3000  # Focal length in mm (typical for See3CAM_CU20)
 SENSOR_HEIGHT_MM = 30  # Correct sensor height for 1/3" sensor in mm
 IMAGE_HEIGHT_PX = 480  # Image height in pixels for 640x480 resolution
 
@@ -44,6 +44,7 @@ def average_slope_intercept(lines):
             slope = (y2 - y1) / (x2 - x1)
             intercept = y1 - (slope * x1)
             length = np.sqrt(((y2 - y1) ** 2) + ((x2 - x1) ** 2))
+            
             if slope < 0:
                 left_lines.append((slope, intercept))
                 left_weights.append((length))
@@ -56,8 +57,10 @@ def average_slope_intercept(lines):
     return left_lane, right_lane
 
 def pixel_points(y1, y2, line):
+    
     if line is None:
         return None
+    
     slope, intercept = line
     
     if abs(slope) < 1e-6:
@@ -68,6 +71,7 @@ def pixel_points(y1, y2, line):
     return ((x1, int(y1)), (x2, int(y2)))
 
 def lane_lines(image, lines):
+    
     if lines is None or len(lines) == 0:
         return None, None
     
@@ -103,9 +107,55 @@ def average_lanes(lane_history):
 road_not_detected_counter = 20  # Counter for frames where road is not detected
 MAX_FRAMES_WITHOUT_LANES = 20  # Number of frames to consider before triggering "no road"
 
+def get_lane_midpoint(left_line, right_line, image_width):
+    #print(f'Image_width: {image_width}')
+    if left_line is not None and right_line is not None:
+        left_x_bottom = left_line[0][0]
+        right_x_bottom = right_line[0][0]
+        midpoint = (left_x_bottom + right_x_bottom) // 2
+        print(f"Left Line X: {left_x_bottom}, Right Line X: {right_x_bottom}")
+
+    elif left_line is not None:
+        midpoint = left_line[0][0] + (image_width // 4)
+        print(f"Only left line detected. Left Line X: {left_line[0][0]}")
+        
+    elif right_line is not None:
+        midpoint = right_line[0][0] - (image_width // 4)
+        print(f"Only right line detected. Right Line X: {right_line[0][0]}")
+    
+    else:
+        return None
+    
+    if 0 <= midpoint <= image_width:
+        print(f'Midpoint:{midpoint}')
+        return midpoint #Midpoint ei ole korralikult kalkuleeritud
+    
+    else:
+        print(f'Midpoint out of bounds: {midpoint}')
+        return None
+
+def determine_turn(midpoint, image_center_x):
+    
+    if midpoint is None:
+        #print(f'image_center_x: {image_center_x}')
+        return None
+    
+    deviation = midpoint - image_center_x
+    print(f"Midpoint: {midpoint}, Image Center: {image_center_x}, Deviation: {deviation}")
+    
+    if deviation > 50:
+        return 'right'
+    
+    elif deviation < -50:
+        return 'left'
+    
+    else:
+        return 'straight'
+
 # Main loop for video stream processing
 while True:
     ret, frame = camera.read()
+    
     if not ret:
         print("Error: Could not read frame.")
         break
@@ -220,8 +270,27 @@ while True:
     smoothed_lane_coords = average_lanes(lane_history)
     frame = draw_lane_lines(frame, smoothed_lane_coords)
     
+    image_center_x = frame.shape[1] // 2
+    midpoint = get_lane_midpoint(smoothed_lane_coords[0], smoothed_lane_coords[1], frame.shape[1])
+    turn_direction = determine_turn(midpoint, image_center_x)
+    
+    if midpoint is not None:
+        cv2.circle(frame, (int(midpoint), frame.shape[0] - 10), 10, (255, 0, 0), -1)
+        
+    if turn_direction == 'left':
+        cv2.putText(frame, "True Left", (50, 400), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+    elif turn_direction == 'right':
+        cv2.putText(frame, "True Right", (50, 400), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+    elif turn_direction == 'straight':
+        cv2.putText(frame, "Go Straight", (50, 400), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+    else:
+        cv2.putText(frame, "No Lane Detected", (50, 400), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+        cv2.putText(frame,f'turn_direction: {turn_direction}', (50, 450), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+
+    
     if lane_line_coords[0] is None and lane_line_coords[1] is None:
         road_not_detected_counter += 1
+        
     else:
         road_not_detected_counter = 0
         
@@ -242,27 +311,6 @@ while True:
     # Break the loop on 'q' key press
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
-
-#lane_history = []  # Buffer to store lane line coordinates over the last N frames
-#N = 5  # Number of frames to average over
-#
-#def average_lanes(lane_history):
-#    left_lines = [lane[0] for lane in lane_history if lane[0] is not None]
-#    right_lines = [lane[1] for lane in lane_history if lane[1] is not None]
-#    
-#    left_avg = np.mean(left_lines, axis=0) if len(left_lines) > 0 else None
-#    right_avg = np.mean(right_lines, axis=0) if len(right_lines) > 0 else None
-#    return left_avg, right_avg
-
-## Inside the main loop after detecting lane lines:
-#lane_line_coords = lane_lines(frame, lines)
-#lane_history.append(lane_line_coords)
-#
-#if len(lane_history) > N:
-#    lane_history.pop(0)
-#
-#smoothed_lane_coords = average_lanes(lane_history)
-#frame = draw_lane_lines(frame, smoothed_lane_coords)
 
 # Release the camera and close the window
 camera.release()
