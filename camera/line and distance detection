@@ -6,7 +6,420 @@ import math
 # Load the YOLO model (YOLOv8n is used in this example)
 model = YOLO('yolov8n.pt')
 
+# Get the class names from the modelimport cv2
+from ultralytics import YOLO
+import numpy as np
+import math
+
+# Load the YOLO model (YOLOv8n is used in this example)
+model = YOLO('yolov8n.pt')
+
 # Get the class names from the model
+class_names = model.names  # List of class names, indexed by class ID
+
+# Camera parameters (corrected) #Come back to later
+FOCAL_LENGTH = 48  # Focal length in mm (typical for See3CAM_CU20)
+SENSOR_HEIGHT_MM = 368  # Correct sensor height for 1/3" sensor in mm
+IMAGE_HEIGHT_PX = 48  # Image height in pixels for 640x480 resolution
+
+# Open the camera
+camera = cv2.VideoCapture(4)  # Adjust camera index if necessary
+width = camera.get(cv2.CAP_PROP_FRAME_WIDTH)
+height = camera.get(cv2.CAP_PROP_FRAME_HEIGHT)
+print(f"Camera Resolution: {int(width)}x{int(height)}")
+
+# Set camera resolution
+camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
+camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+
+if not camera.isOpened():
+    print("Error: Could not open camera.")
+    exit()
+
+
+# Function for calculating lane lines
+def average_slope_intercept(lines):
+    if lines is None or len(lines) == 0:
+        return None, None
+    
+    left_lines = []  # (slope, intercept)
+    left_weights = []  # (length,)
+    right_lines = []  # (slope, intercept)
+    right_weights = []  # (length,)
+
+    for line in lines:
+        for x1, y1, x2, y2 in line:
+            if x1 == x2:
+                continue
+            slope = (y2 - y1) / (x2 - x1)
+            intercept = y1 - (slope * x1)
+            length = np.sqrt(((y2 - y1) ** 2) + ((x2 - x1) ** 2))
+            
+            if slope < 0:
+                left_lines.append((slope, intercept))
+                left_weights.append((length))
+            else:
+                right_lines.append((slope, intercept))
+                right_weights.append((length))
+
+    left_lane = np.dot(left_weights, left_lines) / np.sum(left_weights) if len(left_weights) > 0 else None
+    right_lane = np.dot(right_weights, right_lines) / np.sum(right_weights) if len(right_weights) > 0 else None
+    return left_lane, right_lane
+
+
+# Function for getting pixel coordinates
+def pixel_points(y1, y2, line):
+    
+    if line is None:
+        return None
+    
+    slope, intercept = line
+    
+    if abs(slope) < 1e-6:
+        return None
+    
+    x1 = int((y1 - intercept) / slope)
+    x2 = int((y2 - intercept) / slope)
+    return ((x1, int(y1)), (x2, int(y2)))
+
+
+# Function for detecting the right and left lane lines
+def lane_lines(image, lines):
+    
+    if lines is None or len(lines) == 0:
+        return None, None
+    
+    left_lane, right_lane = average_slope_intercept(lines)
+    y1 = image.shape[0]
+    y2 = int(y1 * 0.7)
+    left_line = pixel_points(y1, y2, left_lane)
+    right_line = pixel_points(y1, y2, right_lane)
+    return left_line, right_line
+
+
+# Function for drawing lane lines
+def draw_lane_lines(image, lines, color=[255, 255, 0], thickness=12):
+    line_image = np.zeros_like(image)
+    for line in lines:
+        if line is not None:
+            pt1, pt2 = line
+            if isinstance(pt1, tuple) and isinstance(pt2, tuple):
+                pt1 = tuple(map(int, pt1))
+                pt2 = tuple(map(int, pt2))
+                cv2.line(line_image, pt1, pt2, color, thickness)
+    return cv2.addWeighted(image, 1.0, line_image, 1.0, 0.0)
+
+
+lane_history = []  # Buffer to store lane line coordinates over the last N frames
+N = 5  # Number of frames to average over
+
+
+# Function for geting the average lane postion useing frames from lane_history
+def average_lanes(lane_history):
+    left_lines = [lane[0] for lane in lane_history if lane[0] is not None]
+    right_lines = [lane[1] for lane in lane_history if lane[1] is not None]
+    
+    left_avg = np.mean(left_lines, axis=0) if len(left_lines) > 0 else None
+    right_avg = np.mean(right_lines, axis=0) if len(right_lines) > 0 else None
+    return left_avg, right_avg
+
+road_not_detected_counter = 20  # Counter for frames where road is not detected
+MAX_FRAMES_WITHOUT_LANES = 20  # Number of frames to consider before triggering "no road"
+
+
+# Function for calculating midpoint between lanes or approximates 
+def get_lane_midpoint(left_line, right_line, image_width):
+    #print(f'Image_width: {image_width}')
+    if left_line is not None and right_line is not None:
+        left_x_bottom = left_line[0][0]
+        right_x_bottom = right_line[0][0]
+        midpoint = (left_x_bottom + right_x_bottom) // 2
+        print(f"Left Line X: {left_x_bottom}, Right Line X: {right_x_bottom}")
+
+    elif left_line is not None:
+        midpoint = left_line[0][0] + (image_width // 4)
+        print(f"Only left line detected. Left Line X: {left_line[0][0]}")
+        
+    elif right_line is not None:
+        midpoint = right_line[0][0] - (image_width // 4)
+        print(f"Only right line detected. Right Line X: {right_line[0][0]}")
+    
+    else:
+        return None
+    
+    if 0 <= midpoint <= image_width:
+        print(f'Midpoint:{midpoint}')
+        return midpoint #Midpoint ei ole korralikult kalkuleeritud
+    
+    else:
+        print(f'Midpoint out of bounds: {midpoint}')
+        return None
+
+
+# Function for determening if he robot should turn left, right or go straight
+def determine_turn(midpoint, image_center_x):
+    
+    if midpoint is None:
+        #print(f'image_center_x: {image_center_x}')
+        return None
+    
+    deviation = midpoint - image_center_x
+    print(f"Midpoint: {midpoint}, Image Center: {image_center_x}, Deviation: {deviation}")
+    
+    if deviation > 50:
+        return 'right'
+    
+    elif deviation < -50:
+        return 'left'
+    
+    else:
+        return 'straight'
+
+# Function for calculateing the angle of forward lines
+def calculate_line_angle(line):
+    if line is None:
+        return None
+    
+    (x1, y1), (x2, y2) = line
+    
+    delta_y = y2 - y1
+    delta_x = x2 - x1
+    
+    if delta_x == 0:
+        return 90
+    
+    angle_radians = math.atan2(delta_y, delta_x)
+    
+    return angle_radians
+
+
+# Function for defining a region of interest
+def forward_region_of_interest(image):
+    height, width = image.shape[:2]
+    
+    roi_height = height // 4
+    roi_width = width // 4
+    x1 = width // 2 - roi_width // 2
+    x2 = width // 2 + roi_width // 2
+    y1 = height - roi_height
+    y2 = height
+    
+    return image[y1:y2, x1:x2]
+
+
+# Function for calculateing the lane line angle within forward_region_of_interest
+def calculate_forward_line_angle(image):
+    forward_roi = forward_region_of_interest(image)
+    
+    gray = cv2.cvtColor(forward_roi, cv2.COLOR_BGR2GRAY)
+    edges = cv2.Canny(gray, 50, 150)
+    
+    lines = cv2.HoughLinesP(edges, 1, np.pi / 180, 100, minLineLength=30, maxLineGap=10)
+    
+    if lines is not None:
+        for line in lines:
+            for x1, y1, x2, y2 in line:
+                angle_radians = math.atan2((y2 - y1), (x2 - x1))
+                angle_degrees = math.degrees(angle_radians)
+                
+                cv2.line(forward_roi, (x1, y1), (x2, y2), ( 0, 0, 255), 2)
+                
+                return angle_degrees
+    
+    return None
+
+
+# Main loop for video stream processing
+while True:
+    ret, frame = camera.read()
+    
+    if not ret:
+        print("Error: Could not read frame.")
+        break
+
+    # Use YOLO model to detect objects
+    results = model(frame)
+
+    # Start y-coordinate for the first overlay text
+    start_y = 30  # Initial vertical position for displaying the text column
+    line_height = 30  # Distance between each line of text
+    
+    OBJECT_CONFIDENCE_THRESHOLD = 0.4
+
+    # Filter for specific classes (ID 0 for 'person', ID 7 for 'truck', etc.)
+    detections_of_interest = []
+    for result in results:
+        for detection in result.boxes:
+            if int(detection.cls) in range(255) and detection.conf.item() >= OBJECT_CONFIDENCE_THRESHOLD:  # Filter for classes of interest
+                detections_of_interest.append(detection)
+
+    # Annotate the frame with the detections
+    for idx, detection in enumerate(detections_of_interest):
+        # Get the bounding box coordinates
+        x1, y1, x2, y2 = map(int, detection.xyxy[0])  # Bounding box coordinates
+
+        # Get the class name dynamically based on detection.cls
+        class_id = int(detection.cls)
+        class_name = class_names[class_id]
+
+        # Get the confidence score for the detection
+        confidence = detection.conf.item()
+
+        # Calculate the height of the bounding box in pixels
+        object_height_in_image_px = y2 - y1
+
+        # Safeguard: Ensure object_height_in_image_px is not zero or too small
+        if object_height_in_image_px <= 0:
+            print(f"Bounding box height too small: {object_height_in_image_px}px. Skipping...")
+            continue
+
+        # Estimate distance using the pinhole camera model formula
+        distance = (FOCAL_LENGTH * SENSOR_HEIGHT_MM) / (object_height_in_image_px * IMAGE_HEIGHT_PX)
+
+        # Known real-world height of these objects
+        KNOWN_PERSON_HEIGHT = 1.7  # Average height of a person in meters
+        KNOWN_TRUCK_HEIGHT = 3.5  # Average height of a truck in meters
+
+        # Dynamically estimate the real height of the object based on detection
+        if class_name == 'person':
+            real_height = KNOWN_PERSON_HEIGHT
+        elif class_name == 'truck':
+            real_height = KNOWN_TRUCK_HEIGHT
+        else:
+            real_height = (object_height_in_image_px * distance) / FOCAL_LENGTH
+
+        # Create a label with distance and real height
+        overlay_text = f'{class_name} {confidence:.2f} Distance: {distance:.2f}m Height: {real_height:.2f}m'
+
+        # Draw the bounding box on the frame
+        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+
+        # Display the overlay text in a column, separated by 'line_height' for each object
+        text_y = start_y + idx * line_height
+        cv2.putText(frame, overlay_text, (10, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 2)
+        
+        # Begining of the stop if object infront of robot part of the code
+        if distance <= 1.0:
+            if class_name == 'person':
+                cv2.putText(frame, "STOP!", (250, 250), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 3)
+
+    # --- Line Detection Process ---
+    # Convert the frame to HSV color space for white color segmentation
+    hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    
+    # Define lower and upper bounds for white color in HSV space
+    lower_white = np.array([0, 0, 200])  # Lower HSV values for white
+    upper_white = np.array([25, 0, 255])  # Upper HSV values for white
+    
+    # Create a mask that isolates white regions
+    white_mask = cv2.inRange(hsv_frame, lower_white, upper_white)
+    
+    # Apply the mask to the frame to extract only white regions
+    white_frame = cv2.bitwise_and(frame, frame, mask=white_mask)
+    
+    # Convert the masked white frame to grayscale
+    gray_white_frame = cv2.cvtColor(white_frame, cv2.COLOR_BGR2GRAY)
+
+    # Apply Canny edge detection on the white regions
+    edges = cv2.Canny(gray_white_frame, 100, 200, apertureSize=3)
+
+    # Define region of interest mask (optional improvement)
+    height, width = frame.shape[:2]
+    mask = np.zeros_like(gray_white_frame)
+    polygon = np.array([[
+        (0, height), 
+        (width, height), 
+        (width, height // 2), 
+        (0, height // 2)
+    ]])
+    cv2.fillPoly(mask, polygon, 255)
+    masked_edges = cv2.bitwise_and(edges, mask)
+
+    # Use masked_edges instead of edges in HoughLinesP
+    lines = cv2.HoughLinesP(masked_edges, 5, np.pi / 180, threshold=100, minLineLength=40, maxLineGap=40)
+
+    lane_line_coords = lane_lines(frame, lines)
+    
+    forward_angle = calculate_forward_line_angle(frame)
+    
+    if forward_angle is not None:
+        cv2.putText(frame, f'Forward Angle: {forward_angle:.2f} degrees', (50, 70), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+        print(f"Forward Line Angle: {forward_angle:.2f} degrees")
+    else:
+        cv2.putText(frame, "No Forward Line Detected", (50, 70), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+
+    
+    #if lane_line_coords is not None:
+    #    left_line, right_line = lane_line_coords
+    #    
+    #    left_line_angle = calculate_line_angle(left_line)
+    #    right_line_angle = calculate_line_angle(right_line)
+    #    
+    #    if left_line_angle is not None:
+    #        cv2.putText(frame, f'Left Line Angle: {left_line_angle:.2f} degrees', (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0), 2)
+    #    
+    #    if right_line_angle is not None:
+    #        cv2.putText(frame, f'Right Line Angle: {right_line_angle:.2f} degrees',(50, 130), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0), 2)
+    #
+    #    print(f'Left Line Angle: {left_line_angle}, Right Line Angle: {right_line_angle}')
+    
+    # Inside the main loop after detecting lane lines:
+    lane_line_coords = lane_lines(frame, lines)
+    lane_history.append(lane_line_coords)
+
+    if len(lane_history) > N:
+        lane_history.pop(0)
+
+    smoothed_lane_coords = average_lanes(lane_history)
+    frame = draw_lane_lines(frame, smoothed_lane_coords)
+    
+    image_center_x = frame.shape[1] // 2
+    midpoint = get_lane_midpoint(smoothed_lane_coords[0], smoothed_lane_coords[1], frame.shape[1])
+    turn_direction = determine_turn(midpoint, image_center_x)
+    
+    if midpoint is not None:
+        cv2.circle(frame, (int(midpoint), frame.shape[0] - 10), 10, (255, 0, 0), -1)
+        
+    if turn_direction == 'left':
+        cv2.putText(frame, "True Left", (50, 400), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+        cv2.arrowedLine(frame, (frame.shape[1]//2, frame.shape[0] - 100), (frame.shape[1]//2 - 100, frame.shape[0] - 150), (0, 255, 255), 5)
+    elif turn_direction == 'right':
+        cv2.putText(frame, "True Right", (50, 400), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+        cv2.arrowedLine(frame, (frame.shape[1]//2, frame.shape[0] - 100), (frame.shape[1]//2 + 100, frame.shape[0] - 150), (0, 255, 255), 5)
+    elif turn_direction == 'straight':
+        cv2.putText(frame, "Go Straight", (50, 400), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+        cv2.arrowedLine(frame, (frame.shape[1]//2, frame.shape[0] - 100), (frame.shape[1]//2, frame.shape[0] - 200), (0, 255, 255), 5)
+    else:
+        cv2.putText(frame, "No Lane Detected", (50, 400), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 2)
+
+    if lane_line_coords[0] is None and lane_line_coords[1] is None:
+        road_not_detected_counter += 1
+        
+    else:
+        road_not_detected_counter = 0
+        
+    if road_not_detected_counter >= MAX_FRAMES_WITHOUT_LANES:
+        cv2.putText(frame, "Warning: Road not detected!", (50, 300), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
+    else:
+        road_not_detected_counter = 0
+    
+    frame = draw_lane_lines(frame, lane_line_coords)
+    # Draw lane lines
+    if lines is not None:
+        lane_line_coords = lane_lines(frame, lines)
+        frame = draw_lane_lines(frame, lane_line_coords)
+
+    # Show the frame with the detected objects and lane lines
+    cv2.imshow('People, Truck Detection, and Lane Detection', frame)
+
+    # Break the loop on 'q' key press
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+# Release the camera and close the window
+camera.release()
+cv2.destroyAllWindows()
+
 class_names = model.names  # List of class names, indexed by class ID
 
 # Camera parameters (corrected) #Come back to later
