@@ -15,18 +15,7 @@ KNOWN_TRUCK_HEIGHT = 3.5  # Average height of a truck in meters
 KNOWN_TRAFFIC_CONE_HEIGHT = 0.45  # Minimal height of a traffic cone for 30mph-50mph in meters
 
 def calculate_ground_distance(v, image_height, focal_length_px, camera_height):
-    """
-    Calculate ground distance using camera height and pixel position.
 
-    Args:
-    - v: Vertical pixel coordinate of the object's base.
-    - image_height: Total height of the image in pixels.
-    - focal_length_px: Focal length of the camera in pixels.
-    - camera_height: Height of the camera from the ground in meters.
-
-    Returns:
-    - Distance to the object in meters.
-    """
     # Calculate the vertical offset from the image center
     v_center = image_height / 2
     pixel_offset = v - v_center
