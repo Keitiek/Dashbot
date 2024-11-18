@@ -1,11 +1,12 @@
 import cv2
 from ultralytics import YOLO
+import math
 
 # Load YOLO model
 model = YOLO('yolov8n.pt')
 
 # Constants for camera and known object heights
-FOCAL_LENGTH = 48  # Focal length in mm (change as per your camera)
+FOCAL_LENGTH_PX = 48  # Focal length in mm (change as per your camera)
 SENSOR_HEIGHT_MM = 48  # Sensor height in mm (assumed; change if known)
 IMAGE_HEIGHT_PX = 48  # Image height in pixels (adjust if needed)
 
@@ -14,10 +15,40 @@ KNOWN_PERSON_HEIGHT = 1.7  # Average height of a person in meters
 KNOWN_TRUCK_HEIGHT = 3.5  # Average height of a truck in meters
 KNOWN_TRAFFIC_CONE_HEIGHT = 0.45  # Minimal height of a traffic cone for 30mph-50mph in meters
 
+# Height of the camera from the ground in meters
+CAMERA_HEIGHT = 0.81  # Adjust based on your setup
+
+def calculate_ground_distance(v, image_height, focal_length_px, camera_height):
+    """
+    Calculate ground distance using camera height and pixel position.
+
+    Args:
+    - v: Vertical pixel coordinate of the object's base.
+    - image_height: Total height of the image in pixels.
+    - focal_length_px: Focal length of the camera in pixels.
+    - camera_height: Height of the camera from the ground in meters.
+
+    Returns:
+    - Distance to the object in meters.
+    """
+    # Calculate the vertical offset from the image center
+    v_center = image_height / 2
+    pixel_offset = v - v_center
+
+    # Calculate the angle of depression in radians
+    theta = math.atan(pixel_offset / focal_length_px)
+
+    # Calculate distance using trigonometry
+    if theta > 0:  # Avoid division by zero
+        distance = (camera_height / math.tan(theta))
+        return distance
+    else:
+        return None  # Invalid angle
+
 def detect_objects(frame):
     # Perform inference using YOLO
     results = model(frame)
-    
+
     # Iterate through each detection result
     for result in results:
         for detection in result.boxes:
@@ -25,48 +56,27 @@ def detect_objects(frame):
             class_id = int(detection.cls)
             confidence = detection.conf.item()
             
-            if confidence >= 0.4:  # Confidence threshold to filter weak detections
+            if confidence >= 0.4:  # Confidence threshold
                 x1, y1, x2, y2 = map(int, detection.xyxy[0])  # Bounding box coordinates
-                class_name = model.names[class_id]  # Get class name based on class_id
-                
-                # Calculate the height of the bounding box in pixels
-                object_height_in_image_px = y2 - y1
+                class_name = model.names[class_id]
 
-                # Safeguard: Ensure object_height_in_image_px is not zero or too small
-                if object_height_in_image_px <= 0:
-                    print(f"Bounding box height too small: {object_height_in_image_px}px. Skipping...")
-                    continue
+                # Use the bottom of the bounding box for ground distance calculation
+                object_base_y = y2
 
-                # Estimate distance using the pinhole camera model formula
-                distance = (FOCAL_LENGTH * SENSOR_HEIGHT_MM) / (object_height_in_image_px * IMAGE_HEIGHT_PX)
+                # Calculate the distance to the object using camera height
+                distance = calculate_ground_distance(
+                    v=object_base_y,
+                    image_height=frame.shape[0],
+                    focal_length_px=FOCAL_LENGTH_PX,
+                    camera_height=CAMERA_HEIGHT
+                )
 
-                # Dynamically estimate the real height of the object based on detection
-                if class_name == 'person':
-                    real_height = KNOWN_PERSON_HEIGHT
-                elif class_name == 'truck':
-                    real_height = KNOWN_TRUCK_HEIGHT
-                elif class_name == 'traffic cone':
-                    real_height = KNOWN_TRAFFIC_CONE_HEIGHT
-                else:
-                    real_height = (object_height_in_image_px * distance) / FOCAL_LENGTH
-
-                # Create a label with distance and real height
-                overlay_text = f'{class_name} {confidence:.2f} Distance: {distance:.2f}m Height: {real_height:.2f}m'
-
-                # Draw the bounding box on the frame
-                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-
-                # Display the overlay text in a column, separated by 'line_height' for each object
-                text_y = y1 - 10  # Adjust text position based on bounding box
-                cv2.putText(frame, overlay_text, (x1, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (200, 200, 200), 2)
-
-                # Begining of the stop if object in front of robot part of the code
-                if 0.8 <= distance <= 1.0:
-                    if class_name == 'person':
-                        cv2.putText(frame, "STOP!", (250, 250), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 3)
-                    else:
-                        cv2.putText(frame, "TURN!", (250, 250), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 3)
-                elif 0.6 <= distance <= 0.8 or class_name == 'traffic cone':
-                    cv2.putText(frame, "REVERSE!", (250, 250), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 3)
+                # Create a label with the calculated distance
+                if distance:
+                    overlay_text = f'{class_name} {confidence:.2f} Distance: {distance:.2f}m'
+                    # Draw bounding box and overlay text
+                    cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                    text_y = y1 - 10
+                    cv2.putText(frame, overlay_text, (x1, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 2)
 
     return frame
