@@ -139,3 +139,10 @@ def draw_lane_lines(image, lines, color=[255, 255, 0], thickness=12):
                 pt2 = tuple(map(int, pt2))
                 cv2.line(line_image, pt1, pt2, color, thickness)
     return cv2.addWeighted(image, 1.0, line_image, 1.0, 0.0)
+
+def calculate_distance(H_real, H_image, focal_length):
+    if H_image > 0:  # Ensure valid size in the image
+        distance = (H_real * focal_length) / H_image
+        return distance
+    else:
+        return None  # Invalid size in image
