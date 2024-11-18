@@ -9,13 +9,7 @@ model = YOLO('yolov8n.pt')
 FOCAL_LENGTH_PX = 120  # Focal length in mm (change as per your camera)
 CAMERA_HEIGHT = 0.85  # Adjust based on your setup
 
-# Known real-world height of these objects
-KNOWN_PERSON_HEIGHT = 1.7  # Average height of a person in meters
-KNOWN_TRUCK_HEIGHT = 3.5  # Average height of a truck in meters
-KNOWN_TRAFFIC_CONE_HEIGHT = 0.45  # Minimal height of a traffic cone for 30mph-50mph in meters
-
 def calculate_ground_distance(v, image_height, focal_length_px, camera_height):
-
     # Calculate the vertical offset from the image center
     v_center = image_height / 2
     pixel_offset = v - v_center
