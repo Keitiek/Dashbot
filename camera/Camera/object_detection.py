@@ -6,17 +6,13 @@ import math
 model = YOLO('yolov8n.pt')
 
 # Constants for camera and known object heights
-FOCAL_LENGTH_PX = 48  # Focal length in mm (change as per your camera)
-SENSOR_HEIGHT_MM = 48  # Sensor height in mm (assumed; change if known)
-IMAGE_HEIGHT_PX = 48  # Image height in pixels (adjust if needed)
+FOCAL_LENGTH_PX = 120  # Focal length in mm (change as per your camera)
+CAMERA_HEIGHT = 0.85  # Adjust based on your setup
 
 # Known real-world height of these objects
 KNOWN_PERSON_HEIGHT = 1.7  # Average height of a person in meters
 KNOWN_TRUCK_HEIGHT = 3.5  # Average height of a truck in meters
 KNOWN_TRAFFIC_CONE_HEIGHT = 0.45  # Minimal height of a traffic cone for 30mph-50mph in meters
-
-# Height of the camera from the ground in meters
-CAMERA_HEIGHT = 0.81  # Adjust based on your setup
 
 def calculate_ground_distance(v, image_height, focal_length_px, camera_height):
     """
@@ -77,6 +73,6 @@ def detect_objects(frame):
                     # Draw bounding box and overlay text
                     cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
                     text_y = y1 - 10
-                    cv2.putText(frame, overlay_text, (x1, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 0), 2)
+                    cv2.putText(frame, overlay_text, (x1, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
 
     return frame
