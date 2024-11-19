@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from utils import average_lanes, draw_lane_lines, average_slope_intercept, pixel_points
+from utils import average_slope_intercept, pixel_points
 
 def lane_detection_process(frame):
     # Convert to HSV and apply white color detection
@@ -34,3 +34,24 @@ def lane_lines(image, lines):
     left_line = pixel_points(y1, y2, left_lane)
     right_line = pixel_points(y1, y2, right_lane)
     return left_line, right_line
+
+def draw_lane_lines(image, lines, color=[255, 255, 0], thickness=12):
+    line_image = np.zeros_like(image)
+    for line in lines:
+        if line is not None:
+            pt1, pt2 = line
+            if isinstance(pt1, tuple) and isinstance(pt2, tuple):
+                pt1 = tuple(map(int, pt1))
+                pt2 = tuple(map(int, pt2))
+                cv2.line(line_image, pt1, pt2, color, thickness)
+    return cv2.addWeighted(image, 1.0, line_image, 1.0, 0.0)
+
+# Main processing function
+def process_frame(frame):
+    # Detect lane line coordinates
+    lane_line_coords = lane_detection_process(frame)
+
+    # Draw the lane lines on the original frame
+    result_frame = draw_lane_lines(frame, lane_line_coords)
+
+    return result_frame
