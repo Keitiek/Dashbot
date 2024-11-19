@@ -1,8 +1,7 @@
 import cv2
 from object_detection import detect_objects
-from lane_detection import lane_detection_process
+from lane_detection import lane_detection_process, draw_lane_lines
 from utils import calculate_forward_line_angle, determine_turn, get_lane_midpoint
-import numpy as np
 
 # Initialize camera
 camera = cv2.VideoCapture(4)  # Camera index
@@ -21,18 +20,26 @@ while True:
     # Lane detection and processing
     lane_line_coords = lane_detection_process(frame)
 
+    # Draw lane lines on the frame
+    if lane_line_coords is not None:
+        frame = draw_lane_lines(frame, lane_line_coords)  # Visualize the detected lane lines
+
     # Calculate forward line angle
     forward_angle = calculate_forward_line_angle(frame)
 
     # Midpoint and turn detection
     image_center_x = frame.shape[1] // 2
-    midpoint = get_lane_midpoint(lane_line_coords[0], lane_line_coords[1], frame.shape[1])
+    if lane_line_coords is not None:
+        midpoint = get_lane_midpoint(lane_line_coords[0], lane_line_coords[1], frame.shape[1])
+    else:
+        midpoint = None
+
     turn_direction = determine_turn(midpoint, image_center_x)
 
     # Draw midpoint if it exists
     if midpoint is not None:
         # Draw a circle at the midpoint
-        cv2.circle(frame, (midpoint, frame.shape[0] - 30), 10, (255, 0, 0), -1)  # Red circle near bottom of the frame
+        cv2.circle(frame, (midpoint, frame.shape[0] - 30), 10, (255, 0, 0), -1)  # Blue circle near bottom of the frame
         # Display turn direction text
         cv2.putText(frame, f"Turn: {turn_direction}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
 
