@@ -38,10 +38,14 @@ while True:
 
     # Draw midpoint if it exists
     if midpoint is not None:
-        # Draw a circle at the midpoint
+    #    # Draw a circle at the midpoint
         cv2.circle(frame, (midpoint, frame.shape[0] - 30), 10, (255, 0, 0), -1)  # Blue circle near bottom of the frame
-        # Display turn direction text
-        cv2.putText(frame, f"Turn: {turn_direction}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+        if midpoint < image_center_x:
+            cv2.putText(frame, f"Turn: Right", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+        elif midpoint > image_center_x:
+            cv2.putText(frame, f"Turn: Left", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+        else:
+            cv2.putText(frame, f"Turn: {turn_direction}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
 
     # Display detected information
     cv2.imshow('Lane and Object Detection', frame)
