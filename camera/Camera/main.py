@@ -2,6 +2,8 @@ import cv2
 from object_detection import detect_objects
 from lane_detection import lane_detection_process, draw_lane_lines
 from utils import calculate_forward_line_angle, determine_turn, get_lane_midpoint
+from motor_control import set_motor_speeds, stop_motors, move_forward, turn_left, turn_right, reverse
+#from camera_utils import initialize_camera
 
 # Initialize camera
 camera = cv2.VideoCapture(4)  # Camera index
@@ -36,24 +38,36 @@ while True:
 
     turn_direction = determine_turn(midpoint, image_center_x)
 
-    # Draw midpoint if it exists
-    if midpoint is not None:
-    #    # Draw a circle at the midpoint
-        cv2.circle(frame, (midpoint, frame.shape[0] - 30), 10, (255, 0, 0), -1)  # Blue circle near bottom of the frame
-        if midpoint < image_center_x:
-            cv2.putText(frame, f"Turn: Right", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
-        elif midpoint > image_center_x:
-            cv2.putText(frame, f"Turn: Left", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
-        else:
-            cv2.putText(frame, f"Turn: {turn_direction}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+    # Motor control logic
+    if turn_direction == 'left':
+        turn_left()
+    elif turn_direction == 'right':
+        turn_right()
+    elif turn_direction == 'straight':
+        move_forward()
+    else:
+        stop_motors()
 
     # Display detected information
+    if midpoint is not None:
+        cv2.circle(frame, (midpoint, frame.shape[0] - 30), 10, (255, 0, 0), -1)  # Blue circle
+                
+        if turn_direction == 'left':
+            displayed_turn_direction = "right"
+        elif turn_direction == 'right':
+            displayed_turn_direction = "left"
+        else:
+            displayed_turn_direction = turn_direction
+        
+        cv2.putText(frame, f"Turn: {displayed_turn_direction}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+
     cv2.imshow('Lane and Object Detection', frame)
 
     # Break the loop on 'q' key press
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-# Release resources
+# Stop motors and release resources
+stop_motors()
 camera.release()
 cv2.destroyAllWindows()
