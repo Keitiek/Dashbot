@@ -61,12 +61,12 @@ def determine_turn(midpoint, image_center_x):
         return None
     deviation = midpoint - image_center_x
     if deviation > 45:
-        return 'right'
-    elif deviation < -45:
         return 'left'
+    elif deviation < -45:
+        return 'right'
     else:
         return 'straight'
-    
+
 # Function for defining a region of interest
 def forward_region_of_interest(image):
     height, width = image.shape[:2]
@@ -94,16 +94,13 @@ def calculate_forward_line_angle(image):
             for x1, y1, x2, y2 in line:
                 angle_radians = math.atan2((y2 - y1), (x2 - x1))
                 angle_degrees = math.degrees(angle_radians)
-                
-                cv2.line(forward_roi, (x1, y1), (x2, y2), ( 0, 0, 255), 2)
-                
+                                
                 return angle_degrees
 
     return None
 
 # Function for calculating midpoint between lanes or approximates 
 def get_lane_midpoint(left_line, right_line, image_width):
-    #print(f'Image_width: {image_width}')
     if left_line is not None and right_line is not None:
         left_x_bottom = left_line[0][0]
         right_x_bottom = right_line[0][0]
@@ -113,7 +110,7 @@ def get_lane_midpoint(left_line, right_line, image_width):
     elif left_line is not None:
         midpoint = left_line[0][0] + (image_width // 4)
         print(f"Only left line detected. Left Line X: {left_line[0][0]}")
-        
+     
     elif right_line is not None:
         midpoint = right_line[0][0] - (image_width // 4)
         print(f"Only right line detected. Right Line X: {right_line[0][0]}")
@@ -129,20 +126,9 @@ def get_lane_midpoint(left_line, right_line, image_width):
         print(f'Midpoint out of bounds: {midpoint}')
         return None
 
-def draw_lane_lines(image, lines, color=[255, 255, 0], thickness=12):
-    line_image = np.zeros_like(image)
-    for line in lines:
-        if line is not None:
-            pt1, pt2 = line
-            if isinstance(pt1, tuple) and isinstance(pt2, tuple):
-                pt1 = tuple(map(int, pt1))
-                pt2 = tuple(map(int, pt2))
-                cv2.line(line_image, pt1, pt2, color, thickness)
-    return cv2.addWeighted(image, 1.0, line_image, 1.0, 0.0)
-
 def calculate_distance(H_real, H_image, focal_length):
-    if H_image > 0:  # Ensure valid size in the image
+    if H_image > 0: # Ensure valid size in the image
         distance = (H_real * focal_length) / H_image
         return distance
     else:
-        return None  # Invalid size in image
+        return None # Invalid size in image
