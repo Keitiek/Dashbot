@@ -6,7 +6,7 @@ def lane_detection_process(frame):
     # Convert to HSV and apply white color detection
     hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     lower_white = np.array([0, 0, 200])
-    upper_white = np.array([25, 0, 255])
+    upper_white = np.array([180, 30, 255])
     white_mask = cv2.inRange(hsv_frame, lower_white, upper_white)
     white_frame = cv2.bitwise_and(frame, frame, mask=white_mask)
     gray_white_frame = cv2.cvtColor(white_frame, cv2.COLOR_BGR2GRAY)
@@ -45,13 +45,3 @@ def draw_lane_lines(image, lines, color=[255, 255, 0], thickness=12):
                 pt2 = tuple(map(int, pt2))
                 cv2.line(line_image, pt1, pt2, color, thickness)
     return cv2.addWeighted(image, 1.0, line_image, 1.0, 0.0)
-
-# Main processing function
-def process_frame(frame):
-    # Detect lane line coordinates
-    lane_line_coords = lane_detection_process(frame)
-
-    # Draw the lane lines on the original frame
-    result_frame = draw_lane_lines(frame, lane_line_coords)
-
-    return result_frame
