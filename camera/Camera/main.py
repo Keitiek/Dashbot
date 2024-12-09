@@ -2,8 +2,7 @@ import cv2
 from object_detection import detect_objects
 from lane_detection import lane_detection_process, draw_lane_lines
 from utils import calculate_forward_line_angle, determine_turn, get_lane_midpoint
-from motor_control import set_motor_speeds, stop_motors, move_forward, turn_left, turn_right, reverse
-#from camera_utils import initialize_camera
+from motor_control import stop_motors, move_forward, turn_left, turn_right, reverse
 
 # Initialize camera
 camera = cv2.VideoCapture(4)  # Camera index
@@ -50,18 +49,10 @@ while True:
 
     # Display detected information
     if midpoint is not None:
-        cv2.circle(frame, (midpoint, frame.shape[0] - 30), 10, (255, 0, 0), -1)  # Blue circle
-                
-        if turn_direction == 'left':
-            displayed_turn_direction = "right"
-        elif turn_direction == 'right':
-            displayed_turn_direction = "left"
-        else:
-            displayed_turn_direction = turn_direction
-        
-        cv2.putText(frame, f"Turn: {displayed_turn_direction}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+        cv2.circle(frame, (midpoint, frame.shape[0] - 30), 10, (255, 0, 0), -1)  # Blue circle 
+        cv2.putText(frame, f"Turn: {turn_direction}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
 
-    cv2.imshow('Lane and Object Detection', frame)
+    cv2.imshow('Camera', frame)
 
     # Break the loop on 'q' key press
     if cv2.waitKey(1) & 0xFF == ord('q'):
