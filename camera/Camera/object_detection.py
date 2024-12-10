@@ -36,7 +36,7 @@ def detect_objects(frame):
             class_id = int(detection.cls)
             CONFIDENCE = detection.conf.item()
             
-            if CONFIDENCE >= 0.3:  # Confidence threshold
+            if CONFIDENCE >= 0.4:  # Confidence threshold
                 x1, y1, x2, y2 = map(int, detection.xyxy[0])  # Bounding box coordinates
                 class_name = model.names[class_id]
 
@@ -59,14 +59,14 @@ def detect_objects(frame):
                     text_y = y1 - 10
                     cv2.putText(frame, overlay_text, (x1, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
                     
-                    if 0.8 <= distance <= 1.0:
+                    if 1.2 <= distance <= 1.5:
                         if class_name == 'person':
                             cv2.putText(frame, "STOP!", (250, 250), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 3)
                             stop_motors()
                         else:
                             cv2.putText(frame, "TURN!", (250, 250), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 3)
                             
-                    elif distance <= 0.8 or class_name == 'traffic cone':
+                    elif distance <= 1.2 or class_name == 'traffic cone':
                         cv2.putText(frame, "REVERSE!", (250, 250), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 3)
                         reverse()
     return frame
