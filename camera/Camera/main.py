@@ -5,7 +5,7 @@ from utils import calculate_forward_line_angle, determine_turn, get_lane_midpoin
 from motor_control import stop_motors, move_forward, turn_left, turn_right, reverse
 
 # Initialize camera
-camera = cv2.VideoCapture(4)  # Camera index
+camera = cv2.VideoCapture(0)  # Camera index
 camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
