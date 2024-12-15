@@ -1,7 +1,6 @@
 import cv2
 from ultralytics import YOLO
 import math
-from motor_control import stop_motors, reverse, turn_left, turn_right
 
 # Load YOLO model
 model = YOLO('yolov8n.pt')
@@ -62,11 +61,9 @@ def detect_objects(frame):
                     if 1.2 <= distance <= 1.5:
                         if class_name == 'person':
                             cv2.putText(frame, "STOP!", (250, 250), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 3)
-                            stop_motors()
                         else:
                             cv2.putText(frame, "TURN!", (250, 250), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 3)
                             
                     elif distance <= 1.2 or class_name == 'traffic cone':
                         cv2.putText(frame, "REVERSE!", (250, 250), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 255), 3)
-                        reverse()
     return frame
